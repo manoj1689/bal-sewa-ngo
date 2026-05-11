@@ -1,0 +1,275 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-py"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model with role-based access control
+model User {
+  id            String      @id @default(cuid())
+  email         String      @unique
+  password_hash String
+  name          String
+  phone         String?
+  role          UserRole    @default(VOLUNTEER_MANAGER)
+  is_active     Boolean     @default(true)
+  last_login    DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
+  // Relations
+  donations     Donation[]
+  volunteers    Volunteer[]
+  blog_posts    Blog[]
+  events        Event[]
+  gallery_items Gallery[]
+  documents     Document[]
+
+  @@index([email])
+  @@index([role])
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  EDITOR
+  VOLUNTEER_MANAGER
+}
+
+// Donation model
+model Donation {
+  id            String          @id @default(cuid())
+  amount        Float
+  currency      String          @default("INR")
+  donor_name    String
+  donor_email   String
+  donor_phone   String?
+  donation_date DateTime        @default(now())
+  status        DonationStatus  @default(COMPLETED)
+  payment_method String?        // "CARD", "BANK_TRANSFER", "CASH", "ONLINE"
+  transaction_id String?        @unique
+  receipt_url   String?
+  message       String?
+  campaign_id   String?
+  campaign      Campaign?       @relation(fields: [campaign_id], references: [id], onDelete: SetNull)
+  user_id       String?
+  user          User?           @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@index([campaign_id])
+  @@index([user_id])
+  @@index([status])
+  @@index([donation_date])
+}
+
+enum DonationStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+// Campaign model
+model Campaign {
+  id              String         @id @default(cuid())
+  title           String
+  description     String
+  goal_amount     Float
+  raised_amount   Float          @default(0)
+  image_url       String?
+  status          CampaignStatus @default(DRAFT)
+  start_date      DateTime
+  end_date        DateTime?
+  is_featured     Boolean        @default(false)
+  seo_title       String?
+  seo_description String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  // Relations
+  donations       Donation[]
+
+  @@index([status])
+  @@index([start_date])
+}
+
+enum CampaignStatus {
+  DRAFT
+  ACTIVE
+  INACTIVE
+  COMPLETED
+}
+
+// Volunteer model
+model Volunteer {
+  id              String            @id @default(cuid())
+  first_name      String
+  last_name       String
+  email           String            @unique
+  phone           String
+  address         String?
+  city            String?
+  state           String?
+  postal_code     String?
+  date_of_birth   DateTime?
+  skills          String?           // JSON or comma-separated
+  availability    String?           // JSON or time slots
+  status          VolunteerStatus   @default(PENDING)
+  motivation      String?
+  experience      String?
+  is_verified     Boolean           @default(false)
+  verify_date     DateTime?
+  user_id         String?
+  user            User?             @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@index([email])
+  @@index([status])
+  @@index([user_id])
+}
+
+enum VolunteerStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  INACTIVE
+}
+
+// Blog model
+model Blog {
+  id              String      @id @default(cuid())
+  title           String
+  slug            String      @unique
+  content         String      // Rich text/HTML content
+  excerpt         String?
+  featured_image  String?
+  status          BlogStatus  @default(DRAFT)
+  views_count     Int         @default(0)
+  seo_title       String?
+  seo_description String?
+  seo_keywords    String?
+  author_id       String
+  author          User        @relation(fields: [author_id], references: [id], onDelete: Cascade)
+  published_at    DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([slug])
+  @@index([status])
+  @@index([author_id])
+  @@index([published_at])
+}
+
+enum BlogStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+// Event model
+model Event {
+  id              String      @id @default(cuid())
+  title           String
+  description     String
+  event_date      DateTime
+  end_date        DateTime?
+  location        String
+  image_url       String?
+  status          EventStatus @default(UPCOMING)
+  max_attendees   Int?
+  attendees_count Int         @default(0)
+  organizer_id    String
+  organizer       User        @relation(fields: [organizer_id], references: [id], onDelete: Cascade)
+  seo_title       String?
+  seo_description String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([event_date])
+  @@index([status])
+  @@index([organizer_id])
+}
+
+enum EventStatus {
+  UPCOMING
+  ONGOING
+  COMPLETED
+  CANCELLED
+}
+
+// Gallery model
+model Gallery {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  image_url   String
+  alt_text    String?
+  order       Int      @default(0)
+  uploader_id String
+  uploader    User     @relation(fields: [uploader_id], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([uploader_id])
+  @@index([order])
+}
+
+// Document model
+model Document {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  file_url    String
+  file_type   String   // pdf, doc, docx, etc
+  file_size   Int      // in bytes
+  document_category String? // Annual Report, Newsletter, etc
+  uploader_id String
+  uploader    User     @relation(fields: [uploader_id], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([uploader_id])
+  @@index([document_category])
+}
+
+// Testimonial model
+model Testimonial {
+  id          String   @id @default(cuid())
+  author_name String
+  author_role String?  // Beneficiary, Donor, Volunteer, etc
+  content     String
+  image_url   String?
+  is_approved Boolean  @default(false)
+  approve_date DateTime?
+  rating      Int?     // 1-5 star rating
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([is_approved])
+}
+
+// Contact Message model
+model ContactMessage {
+  id          String   @id @default(cuid())
+  name        String
+  email       String
+  phone       String?
+  subject     String
+  message     String
+  is_read     Boolean  @default(false)
+  read_date   DateTime?
+  response    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([email])
+  @@index([is_read])
+}
