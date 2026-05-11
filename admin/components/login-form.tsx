@@ -33,31 +33,21 @@ export function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto">
-      <div className="rounded-[2rem] border border-border/60 bg-card p-8 shadow-[0_20px_60px_rgba(124,45,18,0.12)] sm:p-10">
-        <div className="mb-8 hidden lg:block">
-          <p className="text-sm font-medium uppercase tracking-[0.22em] text-primary/80">
-            Secure Access
-          </p>
-          <h2 className="mt-3 text-3xl font-bold text-foreground">Admin Login</h2>
-          <p className="mt-3 text-sm leading-6 text-muted-foreground">
-            Use your admin credentials to access the NGO dashboard and continue your work.
-          </p>
+    <div className="w-full max-w-sm mx-auto">
+      <div className="w-full">
+        <div className="mb-12 text-center">
+          <h2 className="text-4xl font-semibold tracking-tight text-foreground">Sign-in</h2>
         </div>
 
-        <div className="mb-8 text-center lg:hidden">
-          <h2 className="text-2xl font-bold text-foreground">Admin Login</h2>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-7">
           {formError && (
-            <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive">
+            <div className="rounded-2xl border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
               {formError}
             </div>
           )}
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1">
+            <label htmlFor="email" className="block text-xs tracking-[0.18em] text-muted-foreground mb-2 uppercase">
               Email
             </label>
             <input
@@ -66,13 +56,13 @@ export function LoginForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="admin@example.com"
-              className="w-full px-4 py-3 rounded-2xl border border-border bg-card focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-ring"
+              className="w-full border-0 border-b border-border bg-transparent px-0 py-2 text-foreground placeholder:text-muted-foreground/75 focus:outline-none focus:border-primary"
               disabled={loading}
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-foreground mb-1">
+            <label htmlFor="password" className="block text-xs tracking-[0.18em] text-muted-foreground mb-2 uppercase">
               Password
             </label>
             <input
@@ -81,18 +71,24 @@ export function LoginForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full px-4 py-3 rounded-2xl border border-border bg-card focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-ring"
+              className="w-full border-0 border-b border-border bg-transparent px-0 py-2 text-foreground placeholder:text-muted-foreground/75 focus:outline-none focus:border-primary"
               disabled={loading}
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-2xl bg-primary text-primary-foreground py-3 font-medium shadow-lg shadow-primary/20 hover:bg-secondary transition disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? 'Logging in...' : 'Login'}
-          </button>
+          <div className="pt-4">
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full rounded-md bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground shadow-md shadow-primary/20 transition hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {loading ? 'Logging in...' : 'Login'}
+            </button>
+          </div>
+
+          <p className="text-center text-sm text-muted-foreground">
+            Secure access for authorized NGO administrators.
+          </p>
         </form>
       </div>
     </div>
