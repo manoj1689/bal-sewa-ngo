@@ -4,14 +4,17 @@ FastAPI application entry point.
 
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.config.settings import settings
 from app.database.prisma_client import connect_db, disconnect_db
 from app.exceptions_handler import register_exception_handlers
 from app.middleware.logging import LoggingMiddleware
+from app.services.storage import storage_service
 
 # Configure logging
 logging.basicConfig(level=settings.LOG_LEVEL)
@@ -24,6 +27,7 @@ async def lifespan(app: FastAPI):
     # Startup
     logger.info(f"Starting {settings.API_TITLE} v{settings.API_VERSION}")
     logger.info(f"Environment: {settings.ENVIRONMENT}")
+    storage_service.ensure_local_directories()
     await connect_db()
     yield
     # Shutdown
@@ -52,6 +56,12 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+)
+
+app.mount(
+    "/uploads",
+    StaticFiles(directory=Path(settings.FILE_UPLOAD_DIR), check_dir=False),
+    name="uploads",
 )
 
 

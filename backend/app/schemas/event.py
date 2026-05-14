@@ -19,6 +19,7 @@ class EventCreate(BaseModel):
     end_date: Optional[datetime] = None
     location: str = Field(..., min_length=1, max_length=200)
     image_url: Optional[str] = None
+    extra_images: list[str] = Field(default_factory=list)
     status: Optional[EventStatus] = Field(EventStatus.UPCOMING)
     max_attendees: Optional[int] = Field(None, gt=0)
     seo_title: Optional[str] = Field(None, max_length=200)
@@ -34,6 +35,7 @@ class EventUpdate(BaseModel):
     end_date: Optional[datetime] = None
     location: Optional[str] = None
     image_url: Optional[str] = None
+    extra_images: Optional[list[str]] = None
     status: Optional[EventStatus] = None
     max_attendees: Optional[int] = None
     seo_title: Optional[str] = None
@@ -50,6 +52,7 @@ class EventResponse(BaseModel):
     end_date: Optional[datetime] = None
     location: str
     image_url: Optional[str] = None
+    extra_images: list[str] = Field(default_factory=list)
     status: str
     max_attendees: Optional[int] = None
     attendees_count: int

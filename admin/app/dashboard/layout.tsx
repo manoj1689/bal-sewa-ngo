@@ -8,7 +8,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [desktopCollapsed, setDesktopCollapsed] = useState(false);
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-background text-foreground">
       <Sidebar
         desktopCollapsed={desktopCollapsed}
         onDesktopToggle={() => setDesktopCollapsed((value) => !value)}

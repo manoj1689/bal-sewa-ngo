@@ -2,7 +2,8 @@
 Donation service for business logic.
 """
 
-from datetime import datetime, timedelta
+from app.core.constants import DonationStatus
+from app.repositories.entities import CampaignRepository
 from app.repositories.donation import DonationRepository
 from app.schemas.donation import (
     DonationCreate,
@@ -17,11 +18,27 @@ class DonationService:
 
     def __init__(self):
         self.repository = DonationRepository()
+        self.campaign_repository = CampaignRepository()
+
+    async def _sync_campaign_total(self, campaign_id: str | None):
+        """Recalculate and persist a campaign's raised total from completed donations."""
+        if not campaign_id:
+            return
+
+        completed_donations = await self.repository.get_completed_by_campaign(campaign_id)
+        raised_amount = sum(donation.amount for donation in completed_donations)
+        await self.campaign_repository.update(
+            campaign_id,
+            {"raised_amount": raised_amount},
+        )
 
     async def create_donation(self, data: DonationCreate):
         """Create a new donation."""
         donation_data = data.model_dump()
-        return await self.repository.create(donation_data)
+        donation = await self.repository.create(donation_data)
+        if donation.campaign_id and donation.status == DonationStatus.COMPLETED.value:
+            await self._sync_campaign_total(donation.campaign_id)
+        return donation
 
     async def get_donation(self, donation_id: str):
         """Get donation by ID."""
@@ -38,14 +55,27 @@ class DonationService:
 
     async def update_donation(self, donation_id: str, data: DonationUpdate):
         """Update donation."""
-        await self.get_donation(donation_id)
+        existing_donation = await self.get_donation(donation_id)
         update_data = data.model_dump(exclude_unset=True)
-        return await self.repository.update(donation_id, update_data)
+        donation = await self.repository.update(donation_id, update_data)
+
+        affected_campaign_ids = {
+            campaign_id
+            for campaign_id in [existing_donation.campaign_id, donation.campaign_id]
+            if campaign_id
+        }
+        for campaign_id in affected_campaign_ids:
+            await self._sync_campaign_total(campaign_id)
+
+        return donation
 
     async def delete_donation(self, donation_id: str):
         """Delete donation."""
-        await self.get_donation(donation_id)
-        return await self.repository.delete(donation_id)
+        donation = await self.get_donation(donation_id)
+        deleted = await self.repository.delete(donation_id)
+        if donation.campaign_id and donation.status == DonationStatus.COMPLETED.value:
+            await self._sync_campaign_total(donation.campaign_id)
+        return deleted
 
     async def get_campaign_donations(
         self,

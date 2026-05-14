@@ -10,16 +10,17 @@ import { createUser, deleteUser, fetchUsers, updateUser } from '@/store/usersSli
 import type { User } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { FormSelect, type FormSelectOption } from '@/components/ui/form-select';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 
 type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'EDITOR' | 'VOLUNTEER_MANAGER';
+
+const userRoleOptions: FormSelectOption<UserRole>[] = [
+  { value: 'SUPER_ADMIN', label: 'SUPER_ADMIN' },
+  { value: 'ADMIN', label: 'ADMIN' },
+  { value: 'EDITOR', label: 'EDITOR' },
+  { value: 'VOLUNTEER_MANAGER', label: 'VOLUNTEER_MANAGER' },
+];
 
 type UserFormState = {
   email: string;
@@ -197,7 +198,7 @@ export default function UsersPage() {
   return (
     <div>
       <div className="mb-8 flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-800">Users Management</h1>
+        <h1 className="text-3xl font-bold text-foreground">Users Management</h1>
         <Button
           type="button"
           onClick={openCreateModal}
@@ -209,41 +210,41 @@ export default function UsersPage() {
       </div>
 
       {error && (
-        <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
+        <div className="mb-4 rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-destructive">
           {error}
         </div>
       )}
 
-      <div className="overflow-x-auto rounded-2xl bg-white shadow-sm ring-1 ring-slate-200/70">
+      <div className="overflow-x-auto rounded-2xl border border-border bg-card shadow-sm">
         <table className="w-full">
-          <thead className="border-b bg-slate-50/80">
+          <thead className="border-b border-border bg-muted/40">
             <tr>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Email</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Name</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Role</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Email</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Name</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Role</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Status</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y">
+          <tbody className="divide-y divide-border">
             {users.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
+                <td colSpan={5} className="px-6 py-4 text-center text-muted-foreground">
                   No users found
                 </td>
               </tr>
             ) : (
               users.map((user) => (
-                <tr key={user.id} className="hover:bg-slate-50/70">
-                  <td className="px-6 py-4 text-sm text-gray-800">{user.email}</td>
-                  <td className="px-6 py-4 text-sm text-gray-800">{user.name || '-'}</td>
-                  <td className="px-6 py-4 text-sm text-gray-800">{user.role || '-'}</td>
+                <tr key={user.id} className="hover:bg-muted/30">
+                  <td className="px-6 py-4 text-sm text-foreground">{user.email}</td>
+                  <td className="px-6 py-4 text-sm text-foreground">{user.name || '-'}</td>
+                  <td className="px-6 py-4 text-sm text-foreground">{user.role || '-'}</td>
                   <td className="px-6 py-4 text-sm">
                     <span
                       className={`rounded-full px-3 py-1 text-xs font-medium ${
                         user.is_active
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-red-100 text-red-800'
+                          ? 'bg-secondary/15 text-secondary'
+                          : 'bg-destructive/10 text-destructive'
                       }`}
                     >
                       {user.is_active ? 'Active' : 'Inactive'}
@@ -266,7 +267,7 @@ export default function UsersPage() {
                         variant="outline"
                         size="sm"
                         onClick={() => setDeletingUser(user)}
-                        className="rounded-lg border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
+                        className="rounded-lg border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/15"
                       >
                         <Trash2 size={16} />
                         Delete
@@ -284,11 +285,11 @@ export default function UsersPage() {
         open={isCreateOpen}
         onClose={() => closeCreateModal(false)}
         center
-        classNames={{ modal: 'w-full max-w-2xl rounded-3xl p-0 overflow-hidden' }}
+        classNames={{ modal: 'w-full max-w-2xl rounded-3xl bg-card p-0 text-foreground overflow-hidden' }}
       >
-        <div className="border-b px-6 py-5 sm:px-8">
-          <h2 className="text-2xl font-bold text-slate-900">Create User</h2>
-          <p className="mt-2 text-sm text-slate-500">
+        <div className="border-b border-border bg-card px-6 py-5 sm:px-8">
+          <h2 className="text-2xl font-bold text-foreground">Create User</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
             Add a new user to the NGO admin system with the correct access role.
           </p>
         </div>
@@ -309,11 +310,11 @@ export default function UsersPage() {
         open={!!editingUser}
         onClose={() => closeEditModal(false)}
         center
-        classNames={{ modal: 'w-full max-w-2xl rounded-3xl p-0 overflow-hidden' }}
+        classNames={{ modal: 'w-full max-w-2xl rounded-3xl bg-card p-0 text-foreground overflow-hidden' }}
       >
-        <div className="border-b px-6 py-5 sm:px-8">
-          <h2 className="text-2xl font-bold text-slate-900">Edit User</h2>
-          <p className="mt-2 text-sm text-slate-500">
+        <div className="border-b border-border bg-card px-6 py-5 sm:px-8">
+          <h2 className="text-2xl font-bold text-foreground">Edit User</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
             Update profile details, access level, and account status.
           </p>
         </div>
@@ -334,19 +335,19 @@ export default function UsersPage() {
         open={!!deletingUser}
         onClose={() => closeDeleteModal(false)}
         center
-        classNames={{ modal: 'w-full max-w-md rounded-3xl p-0 overflow-hidden' }}
+        classNames={{ modal: 'w-full max-w-md rounded-3xl bg-card p-0 text-foreground overflow-hidden' }}
       >
-        <div className="border-b px-6 py-5">
-          <h2 className="text-2xl font-bold text-slate-900">Delete User</h2>
-          <p className="mt-2 text-sm text-slate-500">
+        <div className="border-b border-border bg-card px-6 py-5">
+          <h2 className="text-2xl font-bold text-foreground">Delete User</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
             This will permanently remove the user from the admin system.
           </p>
         </div>
-        <div className="px-6 py-6 text-sm text-slate-600">
-          Delete <span className="font-semibold text-slate-900">{deletingUser?.email}</span>?
+        <div className="bg-card px-6 py-6 text-sm text-muted-foreground">
+          Delete <span className="font-semibold text-foreground">{deletingUser?.email}</span>?
           This action cannot be undone.
         </div>
-        <div className="flex flex-col-reverse gap-2 border-t bg-white p-4 sm:flex-row sm:justify-end">
+        <div className="flex flex-col-reverse gap-2 border-t border-border bg-card p-4 sm:flex-row sm:justify-end">
           <Button
             type="button"
             variant="outline"
@@ -393,16 +394,16 @@ function UserForm({
   onCancel,
 }: UserFormProps) {
   return (
-    <form onSubmit={onSubmit}>
-      <div className="space-y-6 px-6 py-6 sm:px-8">
+    <form onSubmit={onSubmit} className="bg-card text-foreground">
+      <div className="space-y-6 bg-card px-6 py-6 sm:px-8">
         {formError && (
-          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <div className="rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive">
             {formError}
           </div>
         )}
 
         <div className="space-y-2">
-          <label htmlFor={`${isEdit ? 'edit' : 'create'}-email`} className="text-sm font-semibold text-slate-700">
+          <label htmlFor={`${isEdit ? 'edit' : 'create'}-email`} className="text-sm font-semibold text-foreground">
             Email *
           </label>
           <Input
@@ -419,7 +420,7 @@ function UserForm({
 
         {!isEdit && (
           <div className="space-y-2">
-            <label htmlFor="create-password" className="text-sm font-semibold text-slate-700">
+            <label htmlFor="create-password" className="text-sm font-semibold text-foreground">
               Password *
             </label>
             <Input
@@ -437,7 +438,7 @@ function UserForm({
 
         <div className="grid gap-6 sm:grid-cols-2">
           <div className="space-y-2">
-            <label htmlFor={`${isEdit ? 'edit' : 'create'}-name`} className="text-sm font-semibold text-slate-700">
+            <label htmlFor={`${isEdit ? 'edit' : 'create'}-name`} className="text-sm font-semibold text-foreground">
               Name *
             </label>
             <Input
@@ -453,7 +454,7 @@ function UserForm({
           </div>
 
           <div className="space-y-2">
-            <label htmlFor={`${isEdit ? 'edit' : 'create'}-phone`} className="text-sm font-semibold text-slate-700">
+            <label htmlFor={`${isEdit ? 'edit' : 'create'}-phone`} className="text-sm font-semibold text-foreground">
               Phone
             </label>
             <Input
@@ -470,36 +471,33 @@ function UserForm({
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-700">Role</label>
-          <Select value={formData.role} onValueChange={onRoleChange}>
-            <SelectTrigger className="h-11 w-full rounded-xl border-border px-4 shadow-none focus-visible:border-ring focus-visible:ring-ring/30">
-              <SelectValue placeholder="Select role" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="SUPER_ADMIN">SUPER_ADMIN</SelectItem>
-              <SelectItem value="ADMIN">ADMIN</SelectItem>
-              <SelectItem value="EDITOR">EDITOR</SelectItem>
-              <SelectItem value="VOLUNTEER_MANAGER">VOLUNTEER_MANAGER</SelectItem>
-            </SelectContent>
-          </Select>
+          <label className="text-sm font-semibold text-foreground">Role</label>
+          <FormSelect<UserRole>
+            inputId={`${isEdit ? 'edit' : 'create'}-role`}
+            options={userRoleOptions}
+            value={formData.role}
+            onChange={onRoleChange}
+            disabled={loading}
+            placeholder="Select role"
+          />
         </div>
 
         {isEdit && (
-          <label className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <label className="flex items-start gap-3 rounded-2xl border border-border bg-muted/40 p-4">
             <Checkbox
               checked={formData.is_active}
               onCheckedChange={onActiveChange}
               className="mt-0.5"
             />
             <div>
-              <p className="text-sm font-semibold text-slate-800">Active account</p>
-              <p className="text-xs text-slate-500">Inactive users will not be able to log in.</p>
+              <p className="text-sm font-semibold text-foreground">Active account</p>
+              <p className="text-xs text-muted-foreground">Inactive users will not be able to log in.</p>
             </div>
           </label>
         )}
       </div>
 
-      <div className="flex flex-col-reverse gap-2 border-t bg-white p-4 sm:flex-row sm:justify-end">
+      <div className="flex flex-col-reverse gap-2 border-t border-border bg-card p-4 sm:flex-row sm:justify-end">
         <Button type="button" variant="outline" onClick={onCancel} disabled={loading}>
           Cancel
         </Button>

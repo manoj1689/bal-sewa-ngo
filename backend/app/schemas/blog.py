@@ -18,6 +18,7 @@ class BlogCreate(BaseModel):
     content: str = Field(..., min_length=1, description="Rich text/HTML content")
     excerpt: Optional[str] = Field(None, max_length=500)
     featured_image: Optional[str] = None
+    extra_images: list[str] = Field(default_factory=list)
     status: Optional[BlogStatus] = Field(BlogStatus.DRAFT)
     seo_title: Optional[str] = Field(None, max_length=200)
     seo_description: Optional[str] = Field(None, max_length=500)
@@ -31,6 +32,7 @@ class BlogUpdate(BaseModel):
     content: Optional[str] = None
     excerpt: Optional[str] = None
     featured_image: Optional[str] = None
+    extra_images: Optional[list[str]] = None
     status: Optional[BlogStatus] = None
     seo_title: Optional[str] = None
     seo_description: Optional[str] = None
@@ -46,6 +48,7 @@ class BlogResponse(BaseModel):
     content: str
     excerpt: Optional[str] = None
     featured_image: Optional[str] = None
+    extra_images: list[str] = Field(default_factory=list)
     status: str
     views_count: int
     seo_title: Optional[str] = None
@@ -68,6 +71,7 @@ class BlogListResponse(BaseModel):
     slug: str
     excerpt: Optional[str] = None
     featured_image: Optional[str] = None
+    extra_images: list[str] = Field(default_factory=list)
     status: str
     views_count: int
     author_id: str

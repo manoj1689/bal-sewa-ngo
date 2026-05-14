@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import apiClient from '@/lib/api-client';
-import { Donation, EntityState, CreateDonationRequest } from '@/types';
+import { Donation, EntityState, CreateDonationRequest, UpdateDonationRequest } from '@/types';
 
 const initialState: EntityState<Donation> = {
   items: [],
@@ -22,11 +22,13 @@ export const fetchDonations = createAsyncThunk(
   ) => {
     try {
       const response = await apiClient.get('/donations', {
-        params: { page, page_size: pageSize },
+        params: { page, limit: pageSize },
       });
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.detail || 'Failed to fetch donations');
+      return rejectWithValue(
+        error.response?.data?.detail || error.response?.data?.message || 'Failed to fetch donations'
+      );
     }
   }
 );
@@ -38,7 +40,9 @@ export const fetchDonationById = createAsyncThunk(
       const response = await apiClient.get(`/donations/${id}`);
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.detail || 'Failed to fetch donation');
+      return rejectWithValue(
+        error.response?.data?.detail || error.response?.data?.message || 'Failed to fetch donation'
+      );
     }
   }
 );
@@ -50,7 +54,23 @@ export const createDonation = createAsyncThunk(
       const response = await apiClient.post('/donations', data);
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.detail || 'Failed to create donation');
+      return rejectWithValue(
+        error.response?.data?.detail || error.response?.data?.message || 'Failed to create donation'
+      );
+    }
+  }
+);
+
+export const updateDonation = createAsyncThunk(
+  'donations/updateDonation',
+  async ({ id, data }: { id: string; data: UpdateDonationRequest }, { rejectWithValue }) => {
+    try {
+      const response = await apiClient.put(`/donations/${id}`, data);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.detail || error.response?.data?.message || 'Failed to update donation'
+      );
     }
   }
 );
@@ -62,7 +82,9 @@ export const deleteDonation = createAsyncThunk(
       await apiClient.delete(`/donations/${id}`);
       return id;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.detail || 'Failed to delete donation');
+      return rejectWithValue(
+        error.response?.data?.detail || error.response?.data?.message || 'Failed to delete donation'
+      );
     }
   }
 );
@@ -86,9 +108,10 @@ const donationsSlice = createSlice({
       })
       .addCase(fetchDonations.fulfilled, (state, action) => {
         state.loading = false;
-        state.items = action.payload.items || action.payload;
-        if (action.payload.total) {
-          state.pagination.total = action.payload.total;
+        state.items = action.payload.data || [];
+        if (action.payload.pagination) {
+          state.pagination.total = action.payload.pagination.total;
+          state.pagination.pageSize = action.payload.pagination.limit;
         }
       })
       .addCase(fetchDonations.rejected, (state, action) => {
@@ -100,7 +123,7 @@ const donationsSlice = createSlice({
       })
       .addCase(fetchDonationById.fulfilled, (state, action) => {
         state.loading = false;
-        state.selectedItem = action.payload;
+        state.selectedItem = action.payload.data;
       })
       .addCase(fetchDonationById.rejected, (state, action) => {
         state.loading = false;
@@ -112,9 +135,33 @@ const donationsSlice = createSlice({
       })
       .addCase(createDonation.fulfilled, (state, action) => {
         state.loading = false;
-        state.items.push(action.payload);
+        if (action.payload.data) {
+          state.items.unshift(action.payload.data);
+        }
       })
       .addCase(createDonation.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(updateDonation.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateDonation.fulfilled, (state, action) => {
+        state.loading = false;
+        const updatedDonation = action.payload.data;
+        if (!updatedDonation) {
+          return;
+        }
+        const index = state.items.findIndex((item) => item.id === updatedDonation.id);
+        if (index !== -1) {
+          state.items[index] = updatedDonation;
+        }
+        if (state.selectedItem?.id === updatedDonation.id) {
+          state.selectedItem = updatedDonation;
+        }
+      })
+      .addCase(updateDonation.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })

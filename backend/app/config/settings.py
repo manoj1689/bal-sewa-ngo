@@ -34,6 +34,7 @@ class Settings(BaseSettings):
     FILE_UPLOAD_DIR: str = "./uploads"
     MAX_FILE_SIZE: int = 10485760  # 10MB
     ALLOWED_FILE_TYPES: str = "jpg,jpeg,png,gif,pdf,doc,docx"
+    FILE_STORAGE_BACKEND: str = "local"
 
     # Admin
     ADMIN_EMAIL: str = "admin@balsewa.org"
@@ -45,6 +46,7 @@ class Settings(BaseSettings):
     AWS_ACCESS_KEY_ID: str = ""
     AWS_SECRET_ACCESS_KEY: str = ""
     AWS_S3_BUCKET: str = ""
+    AWS_S3_ENDPOINT_URL: str = ""
 
     @field_validator("DEBUG", mode="before")
     @classmethod
@@ -69,6 +71,11 @@ class Settings(BaseSettings):
     def cors_origins_list(self) -> List[str]:
         """Convert comma-separated CORS origins to list."""
         return [origin.strip() for origin in self.CORS_ORIGINS.split(",")]
+
+    @property
+    def file_storage_backend(self) -> str:
+        """Normalized file storage backend."""
+        return self.FILE_STORAGE_BACKEND.strip().lower()
 
     class Config:
         env_file = ".env"

@@ -84,6 +84,7 @@ model Campaign {
   goal_amount     Float
   raised_amount   Float          @default(0)
   image_url       String?
+  extra_images    String[]       @default([])
   status          CampaignStatus @default(DRAFT)
   start_date      DateTime
   end_date        DateTime?
@@ -151,6 +152,7 @@ model Blog {
   content         String      // Rich text/HTML content
   excerpt         String?
   featured_image  String?
+  extra_images    String[]    @default([])
   status          BlogStatus  @default(DRAFT)
   views_count     Int         @default(0)
   seo_title       String?
@@ -183,6 +185,7 @@ model Event {
   end_date        DateTime?
   location        String
   image_url       String?
+  extra_images    String[]    @default([])
   status          EventStatus @default(UPCOMING)
   max_attendees   Int?
   attendees_count Int         @default(0)
@@ -247,6 +250,7 @@ model Testimonial {
   author_role String?  // Beneficiary, Donor, Volunteer, etc
   content     String
   image_url   String?
+  extra_images String[] @default([])
   is_approved Boolean  @default(false)
   approve_date DateTime?
   rating      Int?     // 1-5 star rating

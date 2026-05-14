@@ -22,11 +22,13 @@ export const fetchCampaigns = createAsyncThunk(
   ) => {
     try {
       const response = await apiClient.get('/campaigns', {
-        params: { page, page_size: pageSize },
+        params: { page, limit: pageSize },
       });
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.detail || 'Failed to fetch campaigns');
+      return rejectWithValue(
+        error.response?.data?.detail || error.response?.data?.message || 'Failed to fetch campaigns'
+      );
     }
   }
 );
@@ -38,7 +40,9 @@ export const createCampaign = createAsyncThunk(
       const response = await apiClient.post('/campaigns', data);
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.detail || 'Failed to create campaign');
+      return rejectWithValue(
+        error.response?.data?.detail || error.response?.data?.message || 'Failed to create campaign'
+      );
     }
   }
 );
@@ -50,7 +54,9 @@ export const updateCampaign = createAsyncThunk(
       const response = await apiClient.put(`/campaigns/${id}`, data);
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.detail || 'Failed to update campaign');
+      return rejectWithValue(
+        error.response?.data?.detail || error.response?.data?.message || 'Failed to update campaign'
+      );
     }
   }
 );
@@ -62,7 +68,9 @@ export const deleteCampaign = createAsyncThunk(
       await apiClient.delete(`/campaigns/${id}`);
       return id;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.detail || 'Failed to delete campaign');
+      return rejectWithValue(
+        error.response?.data?.detail || error.response?.data?.message || 'Failed to delete campaign'
+      );
     }
   }
 );
@@ -83,9 +91,10 @@ const campaignsSlice = createSlice({
       })
       .addCase(fetchCampaigns.fulfilled, (state, action) => {
         state.loading = false;
-        state.items = action.payload.items || action.payload;
-        if (action.payload.total) {
-          state.pagination.total = action.payload.total;
+        state.items = action.payload.data || [];
+        if (action.payload.pagination) {
+          state.pagination.total = action.payload.pagination.total;
+          state.pagination.pageSize = action.payload.pagination.limit;
         }
       })
       .addCase(fetchCampaigns.rejected, (state, action) => {
@@ -98,7 +107,9 @@ const campaignsSlice = createSlice({
       })
       .addCase(createCampaign.fulfilled, (state, action) => {
         state.loading = false;
-        state.items.push(action.payload);
+        if (action.payload.data) {
+          state.items.unshift(action.payload.data);
+        }
       })
       .addCase(createCampaign.rejected, (state, action) => {
         state.loading = false;
@@ -110,9 +121,13 @@ const campaignsSlice = createSlice({
       })
       .addCase(updateCampaign.fulfilled, (state, action) => {
         state.loading = false;
-        const index = state.items.findIndex((item) => item.id === action.payload.id);
+        const updatedCampaign = action.payload.data;
+        if (!updatedCampaign) {
+          return;
+        }
+        const index = state.items.findIndex((item) => item.id === updatedCampaign.id);
         if (index !== -1) {
-          state.items[index] = action.payload;
+          state.items[index] = updatedCampaign;
         }
       })
       .addCase(updateCampaign.rejected, (state, action) => {

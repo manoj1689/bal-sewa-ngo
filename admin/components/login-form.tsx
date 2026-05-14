@@ -33,13 +33,13 @@ export function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-sm mx-auto">
+    <div className="w-full max-w-md mx-auto">
       <div className="w-full">
-        <div className="mb-12 text-center">
-          <h2 className="text-4xl font-semibold tracking-tight text-foreground">Sign-in</h2>
+        <div className="mb-8 text-center sm:mb-10 lg:mb-12">
+          <h2 className="text-[2rem] font-semibold tracking-tight text-foreground sm:text-[2.35rem]">Sign-in</h2>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-7">
+        <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-7">
           {formError && (
             <div className="rounded-2xl border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
               {formError}
@@ -56,7 +56,7 @@ export function LoginForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="admin@example.com"
-              className="w-full border-0 border-b border-border bg-transparent px-0 py-2 text-foreground placeholder:text-muted-foreground/75 focus:outline-none focus:border-primary"
+              className="w-full border-0 border-b border-border bg-transparent px-0 py-2 text-foreground focus:outline-none focus:border-primary"
               disabled={loading}
             />
           </div>
@@ -71,12 +71,12 @@ export function LoginForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full border-0 border-b border-border bg-transparent px-0 py-2 text-foreground placeholder:text-muted-foreground/75 focus:outline-none focus:border-primary"
+              className="w-full border-0 border-b border-border bg-transparent px-0 py-2 text-foreground focus:outline-none focus:border-primary"
               disabled={loading}
             />
           </div>
 
-          <div className="pt-4">
+          <div className="pt-3 sm:pt-4">
             <button
               type="submit"
               disabled={loading}

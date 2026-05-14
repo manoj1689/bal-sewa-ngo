@@ -2,6 +2,7 @@
 Dashboard routes.
 """
 
+from collections import defaultdict
 from datetime import datetime
 
 from fastapi import APIRouter, Depends
@@ -13,6 +14,8 @@ from app.services.entities import (
     BlogService,
     CampaignService,
     ContactService,
+    EventService,
+    UserService,
     VolunteerService,
 )
 from app.schemas.campaign import CampaignStatsResponse
@@ -26,6 +29,26 @@ volunteer_service = VolunteerService()
 campaign_service = CampaignService()
 blog_service = BlogService()
 contact_service = ContactService()
+event_service = EventService()
+user_service = UserService()
+
+
+def _last_n_months(count: int) -> list[tuple[int, int]]:
+    """Return year/month pairs for the last N months including current month."""
+    current = datetime.utcnow()
+    months: list[tuple[int, int]] = []
+    year = current.year
+    month = current.month
+
+    for _ in range(count):
+        months.append((year, month))
+        month -= 1
+        if month == 0:
+            month = 12
+            year -= 1
+
+    months.reverse()
+    return months
 
 
 @router.get("/stats", response_model=StandardResponse)
@@ -37,9 +60,12 @@ async def get_dashboard_stats(current_user=Depends(get_current_admin)):
         message="Dashboard statistics fetched successfully",
         data={
             "donations": stats.model_dump(),
+            "total_users": await user_service.repo.count(),
             "total_volunteers": await volunteer_service.repo.count(),
             "total_campaigns": await campaign_service.repo.count(),
+            "active_campaigns": await campaign_service.repo.count(where={"status": "ACTIVE"}),
             "total_blogs": await blog_service.repo.count(),
+            "upcoming_events": await event_service.repo.count(where={"status": "UPCOMING"}),
         },
     )
 
@@ -124,4 +150,92 @@ async def get_campaign_stats(current_user=Depends(get_current_admin)):
         status="success",
         message="Campaign statistics fetched successfully",
         data=campaign_stats,
+    )
+
+
+@router.get("/charts/donations", response_model=StandardResponse)
+async def get_donation_chart_data(current_user=Depends(get_current_admin)):
+    """Get monthly donation trend for the dashboard."""
+    donations, _ = await donation_service.list_donations(skip=0, limit=999999)
+    monthly_totals: dict[tuple[int, int], dict[str, float | int]] = defaultdict(
+        lambda: {"amount": 0.0, "count": 0}
+    )
+
+    for donation in donations:
+        if donation.status != "COMPLETED":
+            continue
+        key = (donation.donation_date.year, donation.donation_date.month)
+        monthly_totals[key]["amount"] += donation.amount
+        monthly_totals[key]["count"] += 1
+
+    chart_data = []
+    for year, month in _last_n_months(6):
+        data = monthly_totals[(year, month)]
+        chart_data.append(
+            {
+                "label": datetime(year, month, 1).strftime("%b %Y"),
+                "amount": round(float(data["amount"]), 2),
+                "count": int(data["count"]),
+            }
+        )
+
+    return StandardResponse(
+        status="success",
+        message="Donation chart data fetched successfully",
+        data=chart_data,
+    )
+
+
+@router.get("/charts/donation-status", response_model=StandardResponse)
+async def get_donation_status_chart_data(current_user=Depends(get_current_admin)):
+    """Get donation status breakdown for the dashboard."""
+    donations, _ = await donation_service.list_donations(skip=0, limit=999999)
+    status_totals: dict[str, dict[str, float | int]] = defaultdict(
+        lambda: {"count": 0, "amount": 0.0}
+    )
+
+    for donation in donations:
+        status_totals[donation.status]["count"] += 1
+        status_totals[donation.status]["amount"] += donation.amount
+
+    chart_data = [
+        {
+            "status": status,
+            "count": int(values["count"]),
+            "amount": round(float(values["amount"]), 2),
+        }
+        for status, values in status_totals.items()
+    ]
+
+    return StandardResponse(
+        status="success",
+        message="Donation status chart data fetched successfully",
+        data=chart_data,
+    )
+
+
+@router.get("/charts/top-campaigns", response_model=StandardResponse)
+async def get_top_campaigns_chart_data(current_user=Depends(get_current_admin)):
+    """Get top campaigns by raised amount for the dashboard."""
+    campaigns, _ = await campaign_service.list_campaigns(skip=0, limit=100)
+    top_campaigns = sorted(
+        campaigns,
+        key=lambda campaign: campaign.raised_amount,
+        reverse=True,
+    )[:5]
+
+    chart_data = [
+        {
+            "id": campaign.id,
+            "title": campaign.title,
+            "raised_amount": campaign.raised_amount,
+            "goal_amount": campaign.goal_amount,
+        }
+        for campaign in top_campaigns
+    ]
+
+    return StandardResponse(
+        status="success",
+        message="Top campaigns chart data fetched successfully",
+        data=chart_data,
     )

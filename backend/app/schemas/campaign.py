@@ -17,6 +17,7 @@ class CampaignCreate(BaseModel):
     description: str = Field(..., min_length=1)
     goal_amount: float = Field(..., gt=0, description="Target fundraising amount")
     image_url: Optional[str] = None
+    extra_images: list[str] = Field(default_factory=list)
     status: Optional[CampaignStatus] = Field(CampaignStatus.DRAFT)
     start_date: datetime
     end_date: Optional[datetime] = None
@@ -32,6 +33,7 @@ class CampaignUpdate(BaseModel):
     description: Optional[str] = None
     goal_amount: Optional[float] = Field(None, gt=0)
     image_url: Optional[str] = None
+    extra_images: Optional[list[str]] = None
     status: Optional[CampaignStatus] = None
     end_date: Optional[datetime] = None
     is_featured: Optional[bool] = None
@@ -48,6 +50,7 @@ class CampaignResponse(BaseModel):
     goal_amount: float
     raised_amount: float
     image_url: Optional[str] = None
+    extra_images: list[str] = Field(default_factory=list)
     status: str
     start_date: datetime
     end_date: Optional[datetime] = None

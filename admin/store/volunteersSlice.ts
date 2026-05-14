@@ -22,11 +22,13 @@ export const fetchVolunteers = createAsyncThunk(
   ) => {
     try {
       const response = await apiClient.get('/volunteers', {
-        params: { page, page_size: pageSize },
+        params: { page, limit: pageSize },
       });
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.detail || 'Failed to fetch volunteers');
+      return rejectWithValue(
+        error.response?.data?.detail || error.response?.data?.message || 'Failed to fetch volunteers'
+      );
     }
   }
 );
@@ -38,7 +40,9 @@ export const createVolunteer = createAsyncThunk(
       const response = await apiClient.post('/volunteers', data);
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.detail || 'Failed to create volunteer');
+      return rejectWithValue(
+        error.response?.data?.detail || error.response?.data?.message || 'Failed to create volunteer'
+      );
     }
   }
 );
@@ -50,7 +54,9 @@ export const updateVolunteer = createAsyncThunk(
       const response = await apiClient.put(`/volunteers/${id}`, data);
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.detail || 'Failed to update volunteer');
+      return rejectWithValue(
+        error.response?.data?.detail || error.response?.data?.message || 'Failed to update volunteer'
+      );
     }
   }
 );
@@ -62,7 +68,9 @@ export const deleteVolunteer = createAsyncThunk(
       await apiClient.delete(`/volunteers/${id}`);
       return id;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.detail || 'Failed to delete volunteer');
+      return rejectWithValue(
+        error.response?.data?.detail || error.response?.data?.message || 'Failed to delete volunteer'
+      );
     }
   }
 );
@@ -83,9 +91,10 @@ const volunteersSlice = createSlice({
       })
       .addCase(fetchVolunteers.fulfilled, (state, action) => {
         state.loading = false;
-        state.items = action.payload.items || action.payload;
-        if (action.payload.total) {
-          state.pagination.total = action.payload.total;
+        state.items = action.payload.data || [];
+        if (action.payload.pagination) {
+          state.pagination.total = action.payload.pagination.total;
+          state.pagination.pageSize = action.payload.pagination.limit;
         }
       })
       .addCase(fetchVolunteers.rejected, (state, action) => {
@@ -98,7 +107,9 @@ const volunteersSlice = createSlice({
       })
       .addCase(createVolunteer.fulfilled, (state, action) => {
         state.loading = false;
-        state.items.push(action.payload);
+        if (action.payload.data) {
+          state.items.unshift(action.payload.data);
+        }
       })
       .addCase(createVolunteer.rejected, (state, action) => {
         state.loading = false;
@@ -110,9 +121,13 @@ const volunteersSlice = createSlice({
       })
       .addCase(updateVolunteer.fulfilled, (state, action) => {
         state.loading = false;
-        const index = state.items.findIndex((item) => item.id === action.payload.id);
+        const updatedVolunteer = action.payload.data;
+        if (!updatedVolunteer) {
+          return;
+        }
+        const index = state.items.findIndex((item) => item.id === updatedVolunteer.id);
         if (index !== -1) {
-          state.items[index] = action.payload;
+          state.items[index] = updatedVolunteer;
         }
       })
       .addCase(updateVolunteer.rejected, (state, action) => {

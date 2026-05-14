@@ -1,8 +1,16 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronDown, Search, LogOut, Settings, User as UserIcon } from 'lucide-react';
+import {
+  ChevronDown,
+  Search,
+  LogOut,
+  Settings,
+  User as UserIcon,
+  Moon,
+  Sun,
+} from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/hooks';
 import { logoutUser } from '@/store/authSlice';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -31,15 +39,36 @@ export function TopNavbar() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.auth.user);
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   const initials = useMemo(
     () => getInitials(user?.name, user?.email),
     [user?.email, user?.name]
   );
 
+  useEffect(() => {
+    const storedTheme = window.localStorage.getItem('admin-theme');
+
+    if (storedTheme === 'dark' || storedTheme === 'light') {
+      setTheme(storedTheme);
+      document.documentElement.classList.toggle('dark', storedTheme === 'dark');
+      return;
+    }
+
+    setTheme('light');
+    document.documentElement.classList.remove('dark');
+  }, []);
+
   const handleLogout = async () => {
     await dispatch(logoutUser());
     router.push('/auth/login');
+  };
+
+  const toggleTheme = () => {
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(nextTheme);
+    document.documentElement.classList.toggle('dark', nextTheme === 'dark');
+    window.localStorage.setItem('admin-theme', nextTheme);
   };
 
   return (
@@ -103,6 +132,13 @@ export function TopNavbar() {
               <DropdownMenuItem className="rounded-xl px-3 py-2 text-foreground hover:bg-muted hover:text-foreground">
                 <Settings />
                 Settings
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="rounded-xl px-3 py-2 text-foreground hover:bg-muted hover:text-foreground"
+                onClick={toggleTheme}
+              >
+                {theme === 'dark' ? <Sun /> : <Moon />}
+                {theme === 'dark' ? 'Light Theme' : 'Dark Theme'}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem

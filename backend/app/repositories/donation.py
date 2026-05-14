@@ -54,6 +54,15 @@ class DonationRepository(BaseRepository):
             order={"donation_date": "desc"},
         )
 
+    async def get_completed_by_campaign(self, campaign_id: str):
+        """Get completed donations for a specific campaign."""
+        return await self.model.prisma().find_many(
+            where={
+                "campaign_id": campaign_id,
+                "status": "COMPLETED",
+            }
+        )
+
     async def get_recent(self, limit: int = 5):
         """Get recent donations."""
         return await self.model.prisma().find_many(

@@ -59,24 +59,37 @@ export interface Donation {
   id: string;
   donor_name: string;
   donor_email: string;
+  donor_phone?: string;
   amount: number;
   currency: string;
   message?: string;
-  transaction_id: string;
-  payment_method: string;
-  status: "pending" | "completed" | "failed" | "refunded";
-  created_at: string;
-  updated_at?: string;
+  transaction_id?: string;
+  payment_method?: string;
+  receipt_url?: string;
+  campaign_id?: string;
+  user_id?: string;
+  donation_date: string;
+  status: 'PENDING' | 'COMPLETED' | 'FAILED' | 'CANCELLED';
+  createdAt: string;
+  updatedAt?: string;
 }
 
 export interface CreateDonationRequest {
   donor_name: string;
   donor_email: string;
+  donor_phone?: string;
   amount: number;
   currency: string;
   message?: string;
-  transaction_id: string;
-  payment_method: string;
+  transaction_id?: string;
+  payment_method?: string;
+  campaign_id?: string;
+}
+
+export interface UpdateDonationRequest {
+  status?: 'PENDING' | 'COMPLETED' | 'FAILED' | 'CANCELLED';
+  receipt_url?: string;
+  message?: string;
 }
 
 // Campaign Types
@@ -85,63 +98,97 @@ export interface Campaign {
   title: string;
   description: string;
   goal_amount: number;
-  current_amount: number;
-  currency: string;
-  status: "active" | "completed" | "paused" | "cancelled";
+  raised_amount: number;
+  status: 'DRAFT' | 'ACTIVE' | 'INACTIVE' | 'COMPLETED';
   start_date: string;
   end_date?: string;
   image_url?: string;
-  created_at: string;
-  updated_at?: string;
+  extra_images: string[];
+  is_featured: boolean;
+  seo_title?: string;
+  seo_description?: string;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 export interface CreateCampaignRequest {
   title: string;
   description: string;
   goal_amount: number;
-  currency: string;
   start_date: string;
   end_date?: string;
   image_url?: string;
+  extra_images?: string[];
+  status?: 'DRAFT' | 'ACTIVE' | 'INACTIVE' | 'COMPLETED';
+  is_featured?: boolean;
+  seo_title?: string;
+  seo_description?: string;
 }
 
 export interface UpdateCampaignRequest {
   title?: string;
   description?: string;
   goal_amount?: number;
-  status?: "active" | "completed" | "paused" | "cancelled";
+  status?: 'DRAFT' | 'ACTIVE' | 'INACTIVE' | 'COMPLETED';
   end_date?: string;
   image_url?: string;
+  extra_images?: string[];
+  is_featured?: boolean;
+  seo_title?: string;
+  seo_description?: string;
 }
 
 // Volunteer Types
 export interface Volunteer {
   id: string;
-  name: string;
+  first_name: string;
+  last_name: string;
   email: string;
-  phone?: string;
+  phone: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  postal_code?: string;
+  date_of_birth?: string;
   skills?: string;
   availability?: string;
-  status: "active" | "inactive" | "pending";
-  created_at: string;
-  updated_at?: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'INACTIVE';
+  motivation?: string;
+  experience?: string;
+  is_verified: boolean;
+  verify_date?: string;
+  user_id?: string;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 export interface CreateVolunteerRequest {
-  name: string;
+  first_name: string;
+  last_name: string;
   email: string;
-  phone?: string;
+  phone: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  postal_code?: string;
+  date_of_birth?: string;
   skills?: string;
   availability?: string;
+  motivation?: string;
+  experience?: string;
 }
 
 export interface UpdateVolunteerRequest {
-  name?: string;
-  email?: string;
+  first_name?: string;
+  last_name?: string;
   phone?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  postal_code?: string;
   skills?: string;
   availability?: string;
-  status?: "active" | "inactive" | "pending";
+  status?: 'PENDING' | 'APPROVED' | 'REJECTED' | 'INACTIVE';
 }
 
 // Blog Types
@@ -150,24 +197,43 @@ export interface Blog {
   title: string;
   content: string;
   slug: string;
-  author?: string;
-  published: boolean;
-  created_at: string;
-  updated_at?: string;
+  excerpt?: string;
+  featured_image?: string;
+  extra_images: string[];
+  status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+  views_count: number;
+  seo_title?: string;
+  seo_description?: string;
+  seo_keywords?: string;
+  author_id: string;
+  published_at?: string;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 export interface CreateBlogRequest {
   title: string;
+  slug?: string;
   content: string;
-  author?: string;
-  published?: boolean;
+  excerpt?: string;
+  featured_image?: string;
+  extra_images?: string[];
+  status?: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+  seo_title?: string;
+  seo_description?: string;
+  seo_keywords?: string;
 }
 
 export interface UpdateBlogRequest {
   title?: string;
   content?: string;
-  author?: string;
-  published?: boolean;
+  excerpt?: string;
+  featured_image?: string;
+  extra_images?: string[];
+  status?: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+  seo_title?: string;
+  seo_description?: string;
+  seo_keywords?: string;
 }
 
 // Event Types
@@ -175,32 +241,47 @@ export interface Event {
   id: string;
   title: string;
   description: string;
-  start_date: string;
-  end_date: string;
-  location?: string;
+  event_date: string;
+  end_date?: string;
+  location: string;
   image_url?: string;
-  status: "upcoming" | "ongoing" | "completed" | "cancelled";
-  created_at: string;
-  updated_at?: string;
+  extra_images: string[];
+  status: 'UPCOMING' | 'ONGOING' | 'COMPLETED' | 'CANCELLED';
+  max_attendees?: number;
+  attendees_count: number;
+  organizer_id: string;
+  seo_title?: string;
+  seo_description?: string;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 export interface CreateEventRequest {
   title: string;
   description: string;
-  start_date: string;
-  end_date: string;
-  location?: string;
+  event_date: string;
+  end_date?: string;
+  location: string;
   image_url?: string;
+  extra_images?: string[];
+  status?: 'UPCOMING' | 'ONGOING' | 'COMPLETED' | 'CANCELLED';
+  max_attendees?: number;
+  seo_title?: string;
+  seo_description?: string;
 }
 
 export interface UpdateEventRequest {
   title?: string;
   description?: string;
-  start_date?: string;
+  event_date?: string;
   end_date?: string;
   location?: string;
   image_url?: string;
-  status?: "upcoming" | "ongoing" | "completed" | "cancelled";
+  extra_images?: string[];
+  status?: 'UPCOMING' | 'ONGOING' | 'COMPLETED' | 'CANCELLED';
+  max_attendees?: number;
+  seo_title?: string;
+  seo_description?: string;
 }
 
 // Gallery Types
@@ -209,70 +290,90 @@ export interface GalleryImage {
   title: string;
   image_url: string;
   description?: string;
-  created_at: string;
-  updated_at?: string;
+  alt_text?: string;
+  order: number;
+  uploader_id: string;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 export interface CreateGalleryImageRequest {
   title: string;
   image_url: string;
   description?: string;
+  alt_text?: string;
+  order?: number;
 }
 
 export interface UpdateGalleryImageRequest {
   title?: string;
   image_url?: string;
   description?: string;
+  alt_text?: string;
+  order?: number;
 }
 
 // Document Types
 export interface Document {
   id: string;
   title: string;
+  description?: string;
   file_url: string;
-  document_type: string;
-  created_at: string;
-  updated_at?: string;
+  file_type: string;
+  file_size: number;
+  document_category?: string;
+  uploader_id: string;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 export interface CreateDocumentRequest {
   title: string;
+  description?: string;
   file_url: string;
-  document_type: string;
+  file_type: string;
+  file_size: number;
+  document_category?: string;
 }
 
 export interface UpdateDocumentRequest {
   title?: string;
-  file_url?: string;
-  document_type?: string;
+  description?: string;
+  document_category?: string;
 }
 
 // Testimonial Types
 export interface Testimonial {
   id: string;
   author_name: string;
+  author_role?: string;
   content: string;
   rating?: number;
   image_url?: string;
-  approved: boolean;
-  created_at: string;
-  updated_at?: string;
+  extra_images: string[];
+  is_approved: boolean;
+  approve_date?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CreateTestimonialRequest {
   author_name: string;
+  author_role?: string;
   content: string;
   rating?: number;
   image_url?: string;
-  approved?: boolean;
+  extra_images?: string[];
 }
 
 export interface UpdateTestimonialRequest {
   author_name?: string;
+  author_role?: string;
   content?: string;
   rating?: number;
   image_url?: string;
-  approved?: boolean;
+  extra_images?: string[];
+  is_approved?: boolean;
 }
 
 // Contact Types
@@ -280,11 +381,30 @@ export interface ContactMessage {
   id: string;
   name: string;
   email: string;
+  phone?: string;
   subject: string;
   message: string;
-  status: "new" | "read" | "responded";
-  created_at: string;
-  updated_at?: string;
+  is_read: boolean;
+  read_date?: string;
+  response?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UpdateContactMessageRequest {
+  is_read?: boolean;
+  response?: string;
+}
+
+export interface UploadedAsset {
+  file_name: string;
+  original_name: string;
+  file_url: string;
+  file_size: number;
+  content_type: string;
+  extension: string;
+  category: string;
+  storage: string;
 }
 
 // API Response Types

@@ -14,6 +14,7 @@ from app.routes.donations import router as donations_router
 from app.routes.events import router as events_router
 from app.routes.gallery import router as gallery_router
 from app.routes.testimonials import router as testimonials_router
+from app.routes.uploads import router as uploads_router
 from app.routes.users import router as users_router
 from app.routes.volunteers import router as volunteers_router
 
@@ -31,3 +32,4 @@ router.include_router(documents_router)
 router.include_router(testimonials_router)
 router.include_router(contact_router)
 router.include_router(dashboard_router)
+router.include_router(uploads_router)
