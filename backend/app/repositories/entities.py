@@ -4,7 +4,7 @@ Repositories for all entity models.
 
 from prisma.models import (
     User, Campaign, Volunteer, Blog, Event,
-    Gallery, Document, Testimonial, ContactMessage
+    Gallery, GalleryBucket, Document, Testimonial, ContactMessage
 )
 from app.repositories.base import BaseRepository
 
@@ -86,11 +86,27 @@ class GalleryRepository(BaseRepository):
     def __init__(self):
         super().__init__(Gallery)
     
-    async def get_all_ordered(self, skip: int = 0, limit: int = 10):
+    async def get_all_ordered(self, skip: int = 0, limit: int = 10, where: dict | None = None):
         return await self.model.prisma().find_many(
+            where=where,
             skip=skip,
             take=limit,
             order={"order": "asc"}
+        )
+
+
+class GalleryBucketRepository(BaseRepository):
+    """Gallery bucket repository."""
+
+    def __init__(self):
+        super().__init__(GalleryBucket)
+
+    async def get_all_ordered(self, skip: int = 0, limit: int = 10, where: dict | None = None):
+        return await self.model.prisma().find_many(
+            where=where,
+            skip=skip,
+            take=limit,
+            order={"order": "asc"},
         )
 
 

@@ -11,6 +11,7 @@ from app.auth.jwt import create_access_token, create_refresh_token, verify_token
 from app.auth.password import verify_password
 from app.auth.schemas import (
     LoginRequest,
+    ProfileUpdateRequest,
     RefreshTokenRequest,
     RegisterRequest,
     TokenResponse,
@@ -62,8 +63,6 @@ async def register(
     credentials: HTTPAuthorizationCredentials | None = Depends(optional_bearer),
 ):
     """Register a new user."""
-    await _ensure_admin_or_bootstrap(credentials)
-
     existing_user = await user_service.get_user_by_email(data.email)
     if existing_user:
         raise ConflictException("Email already registered")
@@ -73,6 +72,7 @@ async def register(
             email=data.email,
             password=data.password,
             name=data.name,
+            phone=data.phone,
         )
     )
     tokens = _build_token_response(user.id)
@@ -143,6 +143,27 @@ async def get_profile(current_user=Depends(get_current_user)):
         status="success",
         message="Profile fetched successfully",
         data=UserProfile.model_validate(current_user),
+    )
+
+
+@router.put("/profile", response_model=StandardResponse)
+async def update_profile(
+    data: ProfileUpdateRequest,
+    current_user=Depends(get_current_user),
+):
+    """Update the authenticated user's own profile."""
+    update_data = data.model_dump(exclude_unset=True)
+
+    if "email" in update_data and update_data["email"] != current_user.email:
+        existing_user = await user_service.get_user_by_email(update_data["email"])
+        if existing_user:
+            raise ConflictException("Email already registered")
+
+    user = await user_service.repo.update(current_user.id, update_data)
+    return StandardResponse(
+        status="success",
+        message="Profile updated successfully",
+        data=UserProfile.model_validate(user),
     )
 
 

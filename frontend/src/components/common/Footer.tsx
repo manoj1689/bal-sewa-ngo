@@ -68,7 +68,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/" className="hover:underline opacity-90">
+                <Link href="/contact" className="hover:underline opacity-90">
                   Contact Us
                 </Link>
               </li>

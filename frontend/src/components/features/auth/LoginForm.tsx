@@ -27,7 +27,7 @@ export default function LoginForm() {
     try {
       const result = await login(formData);
       if (!result.token) return;
-      router.push('/');
+      router.push('/dashboard');
     } catch {
       return;
     }

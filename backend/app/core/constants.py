@@ -63,7 +63,7 @@ DEFAULT_PAGE_SIZE = 10
 MAX_PAGE_SIZE = 100
 
 # File upload constants
-ALLOWED_IMAGE_TYPES = ["jpg", "jpeg", "png", "gif"]
+ALLOWED_IMAGE_TYPES = ["jpg", "jpeg", "png", "gif", "webp"]
 ALLOWED_VIDEO_TYPES = ["mp4", "mov", "avi", "mkv", "webm"]
 ALLOWED_DOCUMENT_TYPES = ["pdf", "doc", "docx"]
 UPLOAD_CHUNK_SIZE = 1024 * 1024  # 1MB chunks for file uploads

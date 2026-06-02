@@ -36,8 +36,8 @@ export const fetchCampaignDetail = createAsyncThunk(
   'campaign/fetchCampaignDetail',
   async (id: string, { rejectWithValue }) => {
     try {
-      const response = await api.get<Campaign>(API_ENDPOINTS.CAMPAIGNS_DETAIL(id));
-      return response.data;
+      const response = await api.get(API_ENDPOINTS.CAMPAIGNS_DETAIL(id));
+      return response.data.data || response.data;
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message || 'Failed to fetch campaign details.'

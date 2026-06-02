@@ -8,8 +8,10 @@ export const fetchGalleryImages = createAsyncThunk(
   'gallery/fetchGalleryImages',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await api.get<GalleryImage[]>(API_ENDPOINTS.GALLERY);
-      return response.data;
+      const response = await api.get(API_ENDPOINTS.GALLERY, {
+        params: { limit: 100 },
+      });
+      return response.data.data || response.data;
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message || 'Failed to fetch gallery images.'
@@ -22,10 +24,10 @@ export const fetchGalleryByCategory = createAsyncThunk(
   'gallery/fetchGalleryByCategory',
   async (category: string, { rejectWithValue }) => {
     try {
-      const response = await api.get<GalleryImage[]>(
-        API_ENDPOINTS.GALLERY_CATEGORY(category)
-      );
-      return response.data;
+      const response = await api.get(API_ENDPOINTS.GALLERY_CATEGORY(category), {
+        params: { limit: 100 },
+      });
+      return response.data.data || response.data;
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message || 'Failed to fetch gallery images.'
@@ -39,8 +41,8 @@ export const fetchTestimonials = createAsyncThunk(
   'testimonial/fetchTestimonials',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await api.get<Testimonial[]>(API_ENDPOINTS.TESTIMONIALS);
-      return response.data;
+      const response = await api.get(API_ENDPOINTS.TESTIMONIALS);
+      return response.data.data || response.data;
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message || 'Failed to fetch testimonials.'

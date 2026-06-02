@@ -2,13 +2,16 @@
 export interface User {
   id: string;
   email: string;
-  first_name: string;
-  last_name: string;
+  name: string;
+  first_name?: string;
+  last_name?: string;
   phone?: string;
   profile_picture?: string;
-  role: 'donor' | 'volunteer' | 'admin';
-  created_at: string;
-  updated_at: string;
+  role: 'donor' | 'volunteer' | 'admin' | 'SUPER_ADMIN' | 'ADMIN' | 'EDITOR' | 'VOLUNTEER_MANAGER';
+  created_at?: string;
+  updated_at?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface AuthResponse {
@@ -30,20 +33,32 @@ export interface RegisterPayload {
   phone?: string;
 }
 
+export interface ProfileUpdatePayload {
+  name: string;
+  email: string;
+  phone?: string;
+}
+
 // Campaign Types
 export interface Campaign {
   id: string;
   title: string;
   description: string;
-  category: string;
+  category?: string;
   image_url?: string;
-  target_amount: number;
-  current_amount: number;
+  extra_images?: string[];
+  target_amount?: number;
+  current_amount?: number;
+  goal_amount?: number;
+  raised_amount?: number;
   start_date: string;
-  end_date: string;
-  status: 'active' | 'completed' | 'inactive';
-  created_at: string;
-  updated_at: string;
+  end_date?: string;
+  status: 'active' | 'completed' | 'inactive' | 'DRAFT' | 'ACTIVE' | 'INACTIVE' | 'COMPLETED';
+  is_featured?: boolean;
+  created_at?: string;
+  updated_at?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // Donation Types
@@ -95,14 +110,22 @@ export interface VolunteerApplicationPayload {
 export interface Blog {
   id: string;
   title: string;
+  slug?: string;
   content: string;
-  author: string;
+  excerpt?: string;
+  author?: string;
+  author_id?: string;
   featured_image?: string;
+  extra_images?: string[];
   category: string;
   tags?: string[];
+  status?: string;
+  views_count?: number;
   published_at?: string;
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // Event Types
@@ -112,13 +135,20 @@ export interface Event {
   description: string;
   location: string;
   event_date: string;
+  end_date?: string;
   end_time?: string;
   image_url?: string;
-  volunteers_needed: number;
-  volunteers_registered: number;
+  extra_images?: string[];
+  max_attendees?: number | null;
+  attendees_count?: number;
+  volunteers_needed?: number;
+  volunteers_registered?: number;
   status: 'upcoming' | 'ongoing' | 'completed';
-  created_at: string;
-  updated_at: string;
+  organizer_id?: string;
+  created_at?: string;
+  updated_at?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // Gallery Types
@@ -126,9 +156,16 @@ export interface GalleryImage {
   id: string;
   title: string;
   image_url: string;
-  category: string;
+  media_type?: 'IMAGE' | 'VIDEO';
+  category?: string;
+  thumbnail_url?: string;
   description?: string;
-  uploaded_at: string;
+  alt_text?: string;
+  order: number;
+  status?: 'DRAFT' | 'PUBLISHED';
+  uploader_id?: string;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 // Testimonial Types
@@ -157,6 +194,7 @@ export interface AuthState {
   loading: boolean;
   error: string | null;
   isAuthenticated: boolean;
+  hydrated: boolean;
 }
 
 export interface CampaignState {

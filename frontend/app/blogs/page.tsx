@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Loader2, ArrowRight, Calendar } from 'lucide-react';
+import { getMediaUrl } from '@/lib/media';
 
 export default function BlogsPage() {
   const dispatch = useAppDispatch();
@@ -22,7 +23,9 @@ export default function BlogsPage() {
 
   if (!mounted) return null;
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'Recent';
+
     return new Date(dateString).toLocaleDateString('en-IN', {
       day: 'numeric',
       month: 'short',
@@ -60,7 +63,7 @@ export default function BlogsPage() {
                     {blog.featured_image && (
                       <div className="h-48 md:h-auto bg-muted rounded-lg overflow-hidden">
                         <img
-                          src={blog.featured_image}
+                          src={getMediaUrl(blog.featured_image)}
                           alt={blog.title}
                           className="w-full h-full object-cover"
                         />
@@ -74,15 +77,15 @@ export default function BlogsPage() {
                           </span>
                           <div className="flex items-center gap-1 text-xs text-muted-foreground">
                             <Calendar className="w-3 h-3" />
-                            {formatDate(blog.published_at || blog.created_at)}
+                            {formatDate(blog.published_at || blog.createdAt || blog.created_at)}
                           </div>
                         </div>
                         <CardTitle className="text-xl line-clamp-2">{blog.title}</CardTitle>
-                        <CardDescription className="text-sm">By {blog.author}</CardDescription>
+                        <CardDescription className="text-sm">By {blog.author || 'Bal Sewa Team'}</CardDescription>
                       </CardHeader>
                       <CardContent className="p-0 mt-4">
-                        <p className="text-sm text-muted-foreground line-clamp-3">{blog.content}</p>
-                        <Link href={`/blogs/${blog.id}`}>
+                        <p className="text-sm text-muted-foreground line-clamp-3">{blog.excerpt || blog.content}</p>
+                        <Link href={`/blogs/${blog.slug || blog.id}`}>
                           <Button variant="ghost" className="mt-4 gap-2 px-0">
                             Read More
                             <ArrowRight className="w-4 h-4" />

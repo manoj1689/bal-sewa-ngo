@@ -33,10 +33,10 @@ export const fetchBlogs = createAsyncThunk(
 
 export const fetchBlogDetail = createAsyncThunk(
   'blog/fetchBlogDetail',
-  async (id: string, { rejectWithValue }) => {
+  async (slug: string, { rejectWithValue }) => {
     try {
-      const response = await api.get<Blog>(API_ENDPOINTS.BLOGS_DETAIL(id));
-      return response.data;
+      const response = await api.get(API_ENDPOINTS.BLOGS_DETAIL(slug));
+      return response.data.data || response.data;
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message || 'Failed to fetch blog details.'

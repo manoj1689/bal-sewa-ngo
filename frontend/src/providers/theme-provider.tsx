@@ -1,11 +1,14 @@
 'use client'
 
-import * as React from 'react'
-import {
-  ThemeProvider as NextThemesProvider,
-  type ThemeProviderProps,
-} from 'next-themes'
+import { useEffect, type ReactNode } from 'react'
+import { useAppSelector } from '@/redux/store'
 
-export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
-  return <NextThemesProvider {...props}>{children}</NextThemesProvider>
+export function ThemeProvider({ children }: { children: ReactNode }) {
+  const theme = useAppSelector((state) => state.ui.theme)
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+  }, [theme])
+
+  return <>{children}</>
 }

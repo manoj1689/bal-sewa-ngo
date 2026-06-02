@@ -1,10 +1,10 @@
 'use client'
 
-import { useTheme } from 'next-themes'
 import { Toaster as Sonner, ToasterProps } from 'sonner'
+import { useAppSelector } from '@/redux/store'
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = 'system' } = useTheme()
+  const theme = useAppSelector((state) => state.ui.theme)
 
   return (
     <Sonner

@@ -21,6 +21,15 @@ class RegisterRequest(BaseModel):
     email: EmailStr = Field(..., description="User email")
     password: str = Field(..., min_length=8, description="User password")
     name: str = Field(..., min_length=2, description="User full name")
+    phone: Optional[str] = Field(None, max_length=20, description="User phone number")
+
+
+class ProfileUpdateRequest(BaseModel):
+    """Authenticated user profile update schema."""
+
+    email: Optional[EmailStr] = Field(None, description="User email")
+    name: Optional[str] = Field(None, min_length=2, max_length=100, description="User full name")
+    phone: Optional[str] = Field(None, max_length=20, description="User phone number")
 
 
 class TokenResponse(BaseModel):

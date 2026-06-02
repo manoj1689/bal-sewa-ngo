@@ -12,7 +12,7 @@ import { Loader2, Heart, Calendar, TrendingUp } from 'lucide-react';
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, hydrated } = useAuth();
   const dispatch = useAppDispatch();
   const [mounted, setMounted] = useState(false);
 
@@ -23,6 +23,8 @@ export default function DashboardPage() {
 
   useEffect(() => {
     setMounted(true);
+    if (!hydrated) return;
+
     if (!isAuthenticated) {
       router.push('/login');
       return;
@@ -31,9 +33,9 @@ export default function DashboardPage() {
     dispatch(fetchMyVolunteerProfile());
     dispatch(fetchMyApplications());
     dispatch(fetchUserDonations());
-  }, [dispatch, isAuthenticated, router]);
+  }, [dispatch, hydrated, isAuthenticated, router]);
 
-  if (!mounted || volunteerLoading || donationLoading) {
+  if (!mounted || !hydrated || volunteerLoading || donationLoading) {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-full">

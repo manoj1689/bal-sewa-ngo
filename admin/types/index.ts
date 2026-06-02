@@ -285,13 +285,46 @@ export interface UpdateEventRequest {
 }
 
 // Gallery Types
+export interface GalleryBucket {
+  id: string;
+  title: string;
+  description?: string;
+  thumbnail_url?: string;
+  status?: 'DRAFT' | 'PUBLISHED';
+  order: number;
+  uploader_id: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface CreateGalleryBucketRequest {
+  title: string;
+  description?: string;
+  thumbnail_url?: string;
+  status?: 'DRAFT' | 'PUBLISHED';
+  order?: number;
+}
+
+export interface UpdateGalleryBucketRequest {
+  title?: string;
+  description?: string;
+  thumbnail_url?: string;
+  status?: 'DRAFT' | 'PUBLISHED';
+  order?: number;
+}
+
 export interface GalleryImage {
   id: string;
   title: string;
   image_url: string;
+  media_type?: 'IMAGE' | 'VIDEO';
+  category?: string;
+  thumbnail_url?: string;
   description?: string;
   alt_text?: string;
   order: number;
+  status?: 'DRAFT' | 'PUBLISHED';
+  bucket_id?: string;
   uploader_id: string;
   createdAt: string;
   updatedAt?: string;
@@ -300,17 +333,27 @@ export interface GalleryImage {
 export interface CreateGalleryImageRequest {
   title: string;
   image_url: string;
+  media_type?: 'IMAGE' | 'VIDEO';
+  category?: string;
+  thumbnail_url?: string;
   description?: string;
   alt_text?: string;
   order?: number;
+  status?: 'DRAFT' | 'PUBLISHED';
+  bucket_id?: string;
 }
 
 export interface UpdateGalleryImageRequest {
   title?: string;
   image_url?: string;
+  media_type?: 'IMAGE' | 'VIDEO';
+  category?: string;
+  thumbnail_url?: string;
   description?: string;
   alt_text?: string;
   order?: number;
+  status?: 'DRAFT' | 'PUBLISHED';
+  bucket_id?: string;
 }
 
 // Document Types

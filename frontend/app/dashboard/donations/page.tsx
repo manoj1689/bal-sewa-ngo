@@ -21,7 +21,7 @@ import Link from 'next/link';
 
 export default function DonationsPage() {
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, hydrated } = useAuth();
   const dispatch = useAppDispatch();
   const [mounted, setMounted] = useState(false);
 
@@ -29,15 +29,17 @@ export default function DonationsPage() {
 
   useEffect(() => {
     setMounted(true);
+    if (!hydrated) return;
+
     if (!isAuthenticated) {
       router.push('/login');
       return;
     }
 
     dispatch(fetchUserDonations());
-  }, [dispatch, isAuthenticated, router]);
+  }, [dispatch, hydrated, isAuthenticated, router]);
 
-  if (!mounted || loading) {
+  if (!mounted || !hydrated || loading) {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-full">

@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import apiClient from '@/lib/api-client';
+import { getToken } from '@/lib/auth-storage';
 import type { UploadedAsset } from '@/types';
 
 type UploadPayload = {
@@ -26,9 +27,11 @@ async function uploadAsset(
   try {
     const formData = new FormData();
     formData.append('file', file);
+    const token = getToken();
     const response = await apiClient.post(endpoint, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
     });
     return response.data;

@@ -30,7 +30,7 @@ export default function RegisterForm() {
     try {
       const result = await register(formData);
       if (!result.token) return;
-      router.push('/');
+      router.push('/dashboard');
     } catch {
       return;
     }

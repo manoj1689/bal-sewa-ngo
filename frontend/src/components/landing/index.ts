@@ -1,0 +1,6 @@
+export { default as AboutSection } from './sections/AboutSection'
+export { default as BecomeVolunteerSection } from './sections/BecomeVolunteerSection'
+export { default as CausesSection } from './sections/CausesSection'
+export { default as HeroSection } from './sections/HeroSection'
+export { default as ImpactStrip } from './sections/ImpactStrip'
+export { default as VolunteersSection } from './sections/VolunteersSection'

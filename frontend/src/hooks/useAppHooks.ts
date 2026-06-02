@@ -1,12 +1,12 @@
 import { useAppDispatch, useAppSelector } from '@/redux/store';
-import { loginUser, registerUser, logoutUser } from '@/redux/thunks/authThunks';
+import { loginUser, registerUser, updateProfile, logoutUser } from '@/redux/thunks/authThunks';
 import { setTheme } from '@/redux/slices/uiSlice';
-import { LoginPayload, RegisterPayload } from '@/types';
+import { LoginPayload, ProfileUpdatePayload, RegisterPayload } from '@/types';
 import { useCallback } from 'react';
 
 export const useAuth = () => {
   const dispatch = useAppDispatch();
-  const { user, token, loading, error, isAuthenticated } = useAppSelector(
+  const { user, token, loading, error, isAuthenticated, hydrated } = useAppSelector(
     (state) => state.auth
   );
 
@@ -22,14 +22,21 @@ export const useAuth = () => {
 
   const logout = useCallback(() => dispatch(logoutUser()), [dispatch]);
 
+  const saveProfile = useCallback(
+    (data: ProfileUpdatePayload) => dispatch(updateProfile(data)).unwrap(),
+    [dispatch]
+  );
+
   return {
     user,
     token,
     loading,
     error,
     isAuthenticated,
+    hydrated,
     login,
     register,
+    updateProfile: saveProfile,
     logout,
   };
 };

@@ -5,7 +5,8 @@ import Navbar from '@/components/common/Navbar';
 import Footer from '@/components/common/Footer';
 import { useAppDispatch, useAppSelector } from '@/redux/store';
 import { fetchGalleryImages } from '@/redux/thunks/galleryAndTestimonialThunks';
-import { Loader2, ZoomIn } from 'lucide-react';
+import { Loader2, Play, ZoomIn } from 'lucide-react';
+import { getMediaUrl } from '@/lib/media';
 
 export default function GalleryPage() {
   const dispatch = useAppDispatch();
@@ -38,7 +39,7 @@ export default function GalleryPage() {
             <div className="flex items-center justify-center py-12">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
-          ) : images.length === 0 ? (
+          ) : !Array.isArray(images) || images.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-muted-foreground text-lg">No images in the gallery yet</p>
             </div>
@@ -51,13 +52,25 @@ export default function GalleryPage() {
                     className="relative group overflow-hidden rounded-lg bg-muted aspect-square cursor-pointer"
                     onClick={() => setSelectedImage(image)}
                   >
-                    <img
-                      src={image.image_url}
-                      alt={image.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                    />
+                    {(image.media_type || 'IMAGE') === 'VIDEO' ? (
+                      <video
+                        src={getMediaUrl(image.image_url)}
+                        poster={image.thumbnail_url ? getMediaUrl(image.thumbnail_url) : undefined}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      />
+                    ) : (
+                      <img
+                        src={getMediaUrl(image.image_url)}
+                        alt={image.alt_text || image.title}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      />
+                    )}
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
-                      <ZoomIn className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                      {(image.media_type || 'IMAGE') === 'VIDEO' ? (
+                        <Play className="w-7 h-7 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                      ) : (
+                        <ZoomIn className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                      )}
                     </div>
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-4 flex flex-col justify-end">
                       <p className="text-white text-sm font-medium">{image.title}</p>
@@ -79,11 +92,21 @@ export default function GalleryPage() {
                     >
                       ✕
                     </button>
-                    <img
-                      src={selectedImage.image_url}
-                      alt={selectedImage.title}
-                      className="w-full h-full object-contain"
-                    />
+                    {(selectedImage.media_type || 'IMAGE') === 'VIDEO' ? (
+                      <video
+                        src={getMediaUrl(selectedImage.image_url)}
+                        poster={selectedImage.thumbnail_url ? getMediaUrl(selectedImage.thumbnail_url) : undefined}
+                        controls
+                        autoPlay
+                        className="w-full max-h-[70vh] object-contain"
+                      />
+                    ) : (
+                      <img
+                        src={getMediaUrl(selectedImage.image_url)}
+                        alt={selectedImage.alt_text || selectedImage.title}
+                        className="w-full h-full object-contain"
+                      />
+                    )}
                     <div className="mt-4 text-center text-white">
                       <h3 className="text-lg font-semibold">{selectedImage.title}</h3>
                       {selectedImage.description && (

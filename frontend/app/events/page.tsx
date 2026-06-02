@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Loader2, Calendar, MapPin, Users } from 'lucide-react';
+import { getMediaUrl } from '@/lib/media';
 
 export default function EventsPage() {
   const dispatch = useAppDispatch();
@@ -54,12 +55,19 @@ export default function EventsPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {events.map((event) => (
+              {events.map((event) => {
+                const registered = event.attendees_count ?? event.volunteers_registered ?? 0;
+                const needed = event.max_attendees ?? event.volunteers_needed ?? 0;
+                const remaining = needed > 0 ? Math.max(needed - registered, 0) : 0;
+                const progress = needed > 0 ? Math.min((registered / needed) * 100, 100) : 0;
+                const eventImage = getMediaUrl(event.image_url);
+
+                return (
                 <Card key={event.id} className="overflow-hidden hover:shadow-lg transition">
-                  {event.image_url && (
+                  {eventImage && (
                     <div className="h-48 bg-muted overflow-hidden">
                       <img
-                        src={event.image_url}
+                        src={eventImage}
                         alt={event.title}
                         className="w-full h-full object-cover"
                       />
@@ -90,21 +98,19 @@ export default function EventsPage() {
                       <div className="flex items-center gap-2 text-sm">
                         <Users className="w-4 h-4 text-primary" />
                         <span>
-                          {event.volunteers_registered} / {event.volunteers_needed} volunteers
+                          {needed > 0 ? `${registered} / ${needed} volunteers` : `${registered} registered`}
                         </span>
                       </div>
                     </div>
 
                     <div className="bg-muted p-3 rounded">
                       <div className="text-xs text-muted-foreground">
-                        Volunteers Needed: {event.volunteers_needed - event.volunteers_registered}
+                        {needed > 0 ? `Volunteers Needed: ${remaining}` : 'Open registration'}
                       </div>
                       <div className="w-full bg-background rounded h-2 mt-2">
                         <div
                           className="bg-primary h-full rounded"
-                          style={{
-                            width: `${(event.volunteers_registered / event.volunteers_needed) * 100}%`,
-                          }}
+                          style={{ width: `${progress}%` }}
                         />
                       </div>
                     </div>
@@ -114,7 +120,8 @@ export default function EventsPage() {
                     </Link>
                   </CardContent>
                 </Card>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

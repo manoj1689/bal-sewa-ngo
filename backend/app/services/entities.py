@@ -7,7 +7,7 @@ from collections.abc import Mapping
 from app.repositories.entities import (
     UserRepository, CampaignRepository, VolunteerRepository,
     BlogRepository, EventRepository, GalleryRepository,
-    DocumentRepository, TestimonialRepository, ContactMessageRepository
+    GalleryBucketRepository, DocumentRepository, TestimonialRepository, ContactMessageRepository
 )
 from app.utils.slug import generate_slug
 from app.exceptions import NotFoundException, ConflictException
@@ -185,6 +185,7 @@ class GalleryService:
     
     def __init__(self):
         self.repo = GalleryRepository()
+        self.bucket_repo = GalleryBucketRepository()
     
     async def create_image(self, data):
         return await self.repo.create(_dump_data(data))
@@ -195,10 +196,40 @@ class GalleryService:
             raise NotFoundException(f"Image {image_id} not found")
         return img
     
-    async def list_gallery(self, skip: int = 0, limit: int = 10):
-        images = await self.repo.get_all_ordered(skip, limit)
-        total = await self.repo.count()
+    async def list_gallery(self, skip: int = 0, limit: int = 10, where: dict | None = None):
+        images = await self.repo.get_all_ordered(skip, limit, where)
+        total = await self.repo.count(where)
         return images, total
+
+    async def update_image(self, image_id: str, data: dict):
+        await self.get_image(image_id)
+        return await self.repo.update(image_id, _dump_data(data))
+
+    async def create_bucket(self, data):
+        return await self.bucket_repo.create(_dump_data(data))
+
+    async def get_bucket(self, bucket_id: str):
+        bucket = await self.bucket_repo.get_by_id(bucket_id)
+        if not bucket:
+            raise NotFoundException(f"Gallery bucket {bucket_id} not found")
+        return bucket
+
+    async def list_buckets(self, skip: int = 0, limit: int = 10, where: dict | None = None):
+        buckets = await self.bucket_repo.get_all_ordered(skip, limit, where)
+        total = await self.bucket_repo.count(where)
+        return buckets, total
+
+    async def update_bucket(self, bucket_id: str, data: dict):
+        await self.get_bucket(bucket_id)
+        return await self.bucket_repo.update(bucket_id, _dump_data(data))
+
+    async def delete_bucket(self, bucket_id: str):
+        await self.get_bucket(bucket_id)
+        await self.repo.model.prisma().update_many(
+            where={"bucket_id": bucket_id},
+            data={"bucket_id": None},
+        )
+        return await self.bucket_repo.delete(bucket_id)
 
 
 class DocumentService:

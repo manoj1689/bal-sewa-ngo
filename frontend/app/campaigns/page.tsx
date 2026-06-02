@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import Link from 'next/link';
 import { Loader2, Heart } from 'lucide-react';
+import { getMediaUrl } from '@/lib/media';
 
 export default function CampaignsPage() {
   const dispatch = useAppDispatch();
@@ -48,13 +49,17 @@ export default function CampaignsPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {campaigns.map((campaign) => {
-                const progress = (campaign.current_amount / campaign.target_amount) * 100;
+                const raisedAmount = campaign.current_amount ?? campaign.raised_amount ?? 0;
+                const targetAmount = campaign.target_amount ?? campaign.goal_amount ?? 0;
+                const progress = targetAmount > 0 ? Math.min((raisedAmount / targetAmount) * 100, 100) : 0;
+                const campaignImage = getMediaUrl(campaign.image_url);
+
                 return (
                   <Card key={campaign.id} className="overflow-hidden hover:shadow-lg transition">
-                    {campaign.image_url && (
+                    {campaignImage && (
                       <div className="h-48 bg-muted overflow-hidden">
                         <img
-                          src={campaign.image_url}
+                          src={campaignImage}
                           alt={campaign.title}
                           className="w-full h-full object-cover"
                         />
@@ -64,7 +69,7 @@ export default function CampaignsPage() {
                       <div className="flex items-start justify-between gap-2">
                         <div>
                           <CardTitle className="text-lg">{campaign.title}</CardTitle>
-                          <CardDescription>{campaign.category}</CardDescription>
+                          <CardDescription>{campaign.category || 'Campaign'}</CardDescription>
                         </div>
                         <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
                           {campaign.status}
@@ -78,7 +83,7 @@ export default function CampaignsPage() {
                         <div className="flex justify-between text-sm">
                           <span>Raised</span>
                           <span className="font-semibold">
-                            ₹{campaign.current_amount.toLocaleString()} / ₹{campaign.target_amount.toLocaleString()}
+                            ₹{raisedAmount.toLocaleString()} / ₹{targetAmount.toLocaleString()}
                           </span>
                         </div>
                         <Progress value={progress} className="h-2" />

@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAppHooks';
 import ThemeToggle from '../common/ThemeToggle';
 import { Button } from '@/components/ui/button';
-import { Menu, X, LogOut, Home, Heart, Calendar, Settings } from 'lucide-react';
+import { Menu, X, LogOut, Home, Heart, Calendar, UserRound, HandHeart, Megaphone } from 'lucide-react';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -24,9 +24,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const menuItems = [
     { label: 'Dashboard', href: '/dashboard', icon: Home },
+    { label: 'Profile', href: '/dashboard/profile', icon: UserRound },
     { label: 'My Donations', href: '/dashboard/donations', icon: Heart },
     { label: 'My Events', href: '/dashboard/events', icon: Calendar },
-    { label: 'Settings', href: '/dashboard/settings', icon: Settings },
+    { label: 'Volunteer', href: '/dashboard/volunteer', icon: HandHeart },
+    { label: 'Supported Campaigns', href: '/dashboard/campaigns', icon: Megaphone },
   ];
 
   return (
@@ -59,7 +61,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
         <div className="absolute bottom-6 left-0 right-0 px-3 space-y-3 border-t border-primary-foreground/20 pt-4">
           <div className="px-4 py-2">
-            <p className="text-sm font-medium">{user?.first_name} {user?.last_name}</p>
+            <p className="text-sm font-medium">
+              {user?.name || `${user?.first_name || ''} ${user?.last_name || ''}`.trim() || 'User'}
+            </p>
             <p className="text-xs opacity-75">{user?.email}</p>
           </div>
           <Button

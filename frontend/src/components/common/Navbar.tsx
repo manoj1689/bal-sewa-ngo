@@ -3,16 +3,33 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAppHooks';
-import { Heart, Menu, Search, UserRound, X } from 'lucide-react';
-import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { ChevronDown, CircleUserRound, Heart, LayoutDashboard, LogOut, Menu, Search, UserRound, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import ThemeToggle from './ThemeToggle';
 
 export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, user, logout, hydrated } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!profileMenuRef.current?.contains(event.target as Node)) {
+        setProfileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleLogout = async () => {
+    setProfileMenuOpen(false);
+    setMobileMenuOpen(false);
     await logout();
     router.push('/');
   };
@@ -21,8 +38,9 @@ export default function Navbar() {
     { href: '/', label: 'Home' },
     { href: '/campaigns', label: 'Causes' },
     { href: '/events', label: 'Events' },
-    { href: '/gallery', label: 'Portfolio' },
+    { href: '/gallery', label: 'Gallery' },
     { href: '/blogs', label: 'Blog' },
+    { href: '/contact', label: 'Contact' },
   ];
 
   const isActive = (href: string) =>
@@ -44,8 +62,8 @@ export default function Navbar() {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-8 lg:flex">
-          {navLinks.slice(0, 4).map((item) => (
+        <nav className="hidden items-center gap-6 xl:gap-8 lg:flex">
+          {navLinks.map((item) => (
             <Link
               key={item.href}
               href={item.href}
@@ -56,60 +74,75 @@ export default function Navbar() {
               {item.label}
             </Link>
           ))}
-
-          <div className="group relative">
-            <Link
-              href="/blogs"
-              className={`text-[17px] font-semibold transition-colors hover:text-[#ff4b42] ${
-                isActive('/blogs') ? 'text-[#ff4b42]' : 'text-white'
-              }`}
-            >
-              Blog
-            </Link>
-            <div className="invisible absolute left-0 top-10 w-52 translate-y-2 bg-white py-1 text-[#111632] opacity-0 shadow-xl transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
-              {['Blog', 'Blog Classic', 'Blog Slider', 'Blog Details'].map((label) => (
-                <Link
-                  key={label}
-                  href="/blogs"
-                  className="block border-b border-slate-100 px-4 py-3 text-sm transition-colors last:border-b-0 hover:bg-slate-50 hover:text-[#ff4b42]"
-                >
-                  {label}
-                </Link>
-              ))}
-            </div>
-          </div>
         </nav>
 
-        <div className="hidden items-center gap-7 lg:flex">
+        <div className="hidden items-center gap-4 xl:gap-5 lg:flex">
+          <ThemeToggle className="text-white hover:bg-white/10 hover:text-[#ff4b42]" />
+
           <button className="text-white transition-colors hover:text-[#ff4b42]" aria-label="Search">
             <Search className="h-7 w-7" strokeWidth={1.7} />
           </button>
 
-          {isAuthenticated && user ? (
-            <button
-              onClick={handleLogout}
-              className="text-white transition-colors hover:text-[#ff4b42]"
-              aria-label="Logout"
-              title="Logout"
-            >
-              <UserRound className="h-8 w-8" strokeWidth={1.6} />
-            </button>
+          {!hydrated ? (
+            <span className="h-11 w-[112px]" aria-hidden="true" />
+          ) : isAuthenticated && user ? (
+            <div ref={profileMenuRef} className="relative">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => setProfileMenuOpen((open) => !open)}
+                className="border-white/35 text-white hover:border-[#ff4b42]"
+                aria-haspopup="menu"
+                aria-expanded={profileMenuOpen}
+              >
+                <UserRound className="h-4 w-4" />
+                Profile
+                <ChevronDown className={`h-4 w-4 transition-transform ${profileMenuOpen ? 'rotate-180' : ''}`} />
+              </Button>
+              {profileMenuOpen && (
+                <div
+                  role="menu"
+                  className="absolute right-0 top-12 w-52 overflow-hidden rounded border border-white/10 bg-white py-2 text-[#111632] shadow-xl"
+                >
+                  <Link
+                    href="/dashboard"
+                    role="menuitem"
+                    onClick={() => setProfileMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 text-sm font-bold transition-colors hover:bg-slate-50 hover:text-[#ff4b42]"
+                  >
+                    <LayoutDashboard className="h-4 w-4" />
+                    Dashboard
+                  </Link>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={handleLogout}
+                    className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-bold transition-colors hover:bg-slate-50 hover:text-[#ff4b42]"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
           ) : (
-            <Link href="/login" className="text-white transition-colors hover:text-[#ff4b42]" aria-label="Login">
-              <UserRound className="h-8 w-8" strokeWidth={1.6} />
-            </Link>
+            <Button
+              asChild
+              size="sm"
+              className="bg-[#ff4b42] text-white hover:bg-white hover:text-[#ff4b42]"
+            >
+              <Link href="/login">
+                <CircleUserRound className="h-4 w-4" />
+                Login
+              </Link>
+            </Button>
           )}
-
-          <Link
-            href="/campaigns"
-            className="rounded px-7 py-4 text-[15px] font-extrabold uppercase tracking-wide text-white transition-colors"
-            style={{ backgroundColor: '#ff4b42' }}
-          >
-            Donate Now
-          </Link>
         </div>
 
         <div className="flex items-center gap-7 lg:hidden">
+          <ThemeToggle className="text-white hover:bg-white/10 hover:text-[#ff4b42]" />
+
           <button className="text-white" aria-label="Search">
             <Search className="h-8 w-8" strokeWidth={1.6} />
           </button>
@@ -142,19 +175,21 @@ export default function Navbar() {
           </nav>
 
           <div className="mx-auto flex max-w-[1680px] flex-col gap-3">
-            {isAuthenticated && user ? (
+            {!hydrated ? null : isAuthenticated && user ? (
               <>
                 <Link
                   href="/dashboard"
                   onClick={() => setMobileMenuOpen(false)}
                   className="rounded border border-white/20 px-5 py-3 text-center text-sm font-bold uppercase tracking-wide text-white"
                 >
+                  <LayoutDashboard className="mr-2 inline h-4 w-4" />
                   Dashboard
                 </Link>
                 <button
                   onClick={handleLogout}
                   className="rounded border border-white/20 px-5 py-3 text-sm font-bold uppercase tracking-wide text-white"
                 >
+                  <LogOut className="mr-2 inline h-4 w-4" />
                   Logout
                 </button>
               </>
@@ -162,18 +197,12 @@ export default function Navbar() {
               <Link
                 href="/login"
                 onClick={() => setMobileMenuOpen(false)}
-                className="rounded border border-white/20 px-5 py-3 text-center text-sm font-bold uppercase tracking-wide text-white"
+                className="rounded bg-[#ff4b42] px-5 py-3 text-center text-sm font-bold uppercase tracking-wide text-white transition-colors hover:bg-white hover:text-[#ff4b42]"
               >
+                <CircleUserRound className="mr-2 inline h-4 w-4" />
                 Login
               </Link>
             )}
-            <Link
-              href="/campaigns"
-              onClick={() => setMobileMenuOpen(false)}
-              className="rounded bg-[#ff4b42] px-5 py-4 text-center text-sm font-extrabold uppercase tracking-wide text-white"
-            >
-              Donate Now
-            </Link>
           </div>
         </div>
       )}

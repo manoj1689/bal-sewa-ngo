@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { AuthState, User } from '@/types';
-import { loginUser, registerUser, fetchCurrentUser, logoutUser } from '../thunks/authThunks';
+import { loginUser, registerUser, fetchCurrentUser, updateProfile, logoutUser } from '../thunks/authThunks';
 
 const initialState: AuthState = {
   user: null,
@@ -8,18 +8,8 @@ const initialState: AuthState = {
   loading: false,
   error: null,
   isAuthenticated: false,
+  hydrated: false,
 };
-
-// Load user from localStorage on initialization
-if (typeof window !== 'undefined') {
-  const storedUser = localStorage.getItem('user');
-  const storedToken = localStorage.getItem('token');
-  if (storedUser && storedToken) {
-    initialState.user = JSON.parse(storedUser);
-    initialState.token = storedToken;
-    initialState.isAuthenticated = true;
-  }
-}
 
 const authSlice = createSlice({
   name: 'auth',
@@ -31,6 +21,29 @@ const authSlice = createSlice({
     setUser: (state, action: PayloadAction<User>) => {
       state.user = action.payload;
       state.isAuthenticated = true;
+    },
+    hydrateAuth: (state) => {
+      if (typeof window === 'undefined') {
+        state.hydrated = true;
+        return;
+      }
+
+      try {
+        const storedUser = localStorage.getItem('user');
+        const storedToken = localStorage.getItem('token');
+        if (storedUser && storedToken) {
+          state.user = JSON.parse(storedUser);
+          state.token = storedToken;
+          state.isAuthenticated = true;
+        }
+      } catch {
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        state.user = null;
+        state.token = null;
+        state.isAuthenticated = false;
+      }
+      state.hydrated = true;
     },
   },
   extraReducers: (builder) => {
@@ -89,6 +102,23 @@ const authSlice = createSlice({
         state.error = action.payload as string;
       });
 
+    // Update Profile
+    builder
+      .addCase(updateProfile.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload;
+        state.isAuthenticated = true;
+        state.error = null;
+      })
+      .addCase(updateProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      });
+
     // Logout User
     builder
       .addCase(logoutUser.pending, (state) => {
@@ -109,5 +139,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { clearError, setUser } = authSlice.actions;
+export const { clearError, setUser, hydrateAuth } = authSlice.actions;
 export default authSlice.reducer;

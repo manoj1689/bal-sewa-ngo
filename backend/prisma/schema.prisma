@@ -29,6 +29,7 @@ model User {
   blog_posts    Blog[]
   events        Event[]
   gallery_items Gallery[]
+  gallery_buckets GalleryBucket[]
   documents     Document[]
 
   @@index([email])
@@ -214,14 +215,42 @@ model Gallery {
   title       String
   description String?
   image_url   String
+  media_type  String   @default("IMAGE")
+  category    String?
+  thumbnail_url String?
   alt_text    String?
   order       Int      @default(0)
+  status      String   @default("PUBLISHED")
+  bucket_id   String?
+  bucket      GalleryBucket? @relation(fields: [bucket_id], references: [id], onDelete: SetNull)
   uploader_id String
   uploader    User     @relation(fields: [uploader_id], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@index([uploader_id])
+  @@index([order])
+  @@index([media_type])
+  @@index([category])
+  @@index([status])
+  @@index([bucket_id])
+}
+
+model GalleryBucket {
+  id            String    @id @default(cuid())
+  title         String
+  description   String?
+  thumbnail_url String?
+  status        String    @default("PUBLISHED")
+  order         Int       @default(0)
+  uploader_id   String
+  uploader      User      @relation(fields: [uploader_id], references: [id], onDelete: Cascade)
+  media_items   Gallery[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([uploader_id])
+  @@index([status])
   @@index([order])
 }
 
